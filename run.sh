@@ -1,16 +1,20 @@
 #!/bin/bash
 
-mkdir website{1,2}
-echo website1 > website1/index.html
-echo website2 > website2/index.html
+WEBSITE1_DOMAIN="website1.example.com"
+WEBSITE2_DOMAIN="website2.example.com"
+CERTS_DIR="certs"
 
-mkdir certs && cd certs
-openssl genrsa -out website1.example.com.key 2048
-openssl req -new -key website1.example.com.key -out website1.example.com.csr -subj "/CN=website1.example.com"
-openssl x509 -req -days 365 -in website1.example.com.csr -signkey website1.example.com.key -out website1.example.com.crt
+generate_ssl_certificates() {
+    local domain="$1"
+    openssl genrsa -out "$domain.key" 2048
+    openssl req -new -key "$domain.key" -out "$domain.csr" -subj "/CN=$domain"
+    openssl x509 -req -days 365 -in "$domain.csr" -signkey "$domain.key" -out "$domain.crt"
+}
 
-openssl genrsa -out website2.example.com.key 2048
-openssl req -new -key website2.example.com.key -out website2.example.com.csr -subj "/CN=website2.example.com"
-openssl x509 -req -days 365 -in website2.example.com.csr -signkey website2.example.com.key -out website2.example.com.crt
+mkdir -p website{1,2}
+echo "website1" > website1/index.html
+echo "website2" > website2/index.html
 
-cd .. && docker compose up -d
+mkdir -p "$CERTS_DIR" && cd "$CERTS_DIR" || exit 1
+generate_ssl_certificates "$WEBSITE1_DOMAIN"
+generate_ssl_certificates "$WEBSITE2_DOMAIN"
