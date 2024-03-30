@@ -15,6 +15,9 @@ mkdir -p website{1,2}
 echo "website1" > website1/index.html
 echo "website2" > website2/index.html
 
-mkdir -p "$CERTS_DIR" && cd "$CERTS_DIR" || exit 1
-generate_ssl_certificates "$WEBSITE1_DOMAIN"
-generate_ssl_certificates "$WEBSITE2_DOMAIN"
+if [ ! -d $CERTS_DIR ]
+then
+  mkdir -p "$CERTS_DIR" && cd "$CERTS_DIR"
+  generate_ssl_certificates "$WEBSITE1_DOMAIN"
+  generate_ssl_certificates "$WEBSITE2_DOMAIN"
+fi
