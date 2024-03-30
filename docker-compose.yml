@@ -1,0 +1,42 @@
+services:
+  website1:
+    image: nginx
+    volumes:
+      - ./website1:/usr/share/nginx/html
+    environment:
+      - VIRTUAL_HOST=website1.example.com
+    networks:
+      - network-outside
+
+  website2:
+    image: nginx
+    volumes:
+      - ./website2:/usr/share/nginx/html
+    environment:
+      - VIRTUAL_HOST=website2.example.com
+    networks:
+      - network-outside
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - network-outside
+    depends_on:
+      - website1
+      - website2
+    environment:
+      DEFAULT_HOST: default_backend
+      VIRTUAL_PROTO: https
+      VIRTUAL_PORT: 443
+
+networks:
+  network-outside:
+
+volumes:
+  certs:
